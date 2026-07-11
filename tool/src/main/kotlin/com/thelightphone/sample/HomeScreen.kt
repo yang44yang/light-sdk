@@ -1,7 +1,7 @@
 package com.thelightphone.sample
 
-import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,71 +12,91 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.thelightphone.sdk.InitialScreen
-import com.thelightphone.sdk.LightFileShare
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
-import com.thelightphone.sdk.SimpleLightScreen
-import com.thelightphone.sdk.callRemoteServiceMethod
-import com.thelightphone.sdk.ui.LightIcon
-import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
 import com.thelightphone.sdk.ui.LightTheme
 import com.thelightphone.sdk.ui.LightThemeController
 import com.thelightphone.sdk.ui.LightThemeTokens
 import com.thelightphone.sdk.ui.lightClickable
-import com.thelightphone.sdk.shared.LightServiceMethod
-import com.thelightphone.sdk.shared.error
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 
-class HomeScreenViewModel(
-    private val fileShare: LightFileShare
+/** 一条习惯 + 它在自己区间内的加/减次数。 */
+data class HabitStat(val task: Task, val goodCount: Int, val badCount: Int)
+
+data class HomeUi(
+    val gold: Int = 0,
+    val totalGood: Int = 0,     // 好习惯累计总次数
+    val totalBad: Int = 0,      // 坏习惯累计总次数
+    val habits: List<HabitStat> = emptyList(),
+    val todos: List<Task> = emptyList(),
+)
+
+class HomeViewModel(
+    private val repo: HabitRepository,
+    private val filesDir: File,
 ) : LightViewModel<Unit>() {
 
-    val ringtones = MutableStateFlow<List<String>>(emptyList())
-    val status = MutableStateFlow<String?>(null)
+    private val _exportMsg = MutableStateFlow<String?>(null)
+    val exportMsg: StateFlow<String?> = _exportMsg.asStateFlow()
 
-    override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
-        super.onScreenShow(screen)
-        ringtones.value = fileShare.list("ringtones")
+    val ui: StateFlow<HomeUi> =
+        combine(repo.gold, repo.tasks, repo.events) { gold, tasks, events ->
+            val totalGood = events.count { it.kind == EventKind.HABIT_POS }
+            val totalBad = events.count { it.kind == EventKind.HABIT_NEG }
+            val habits = tasks.filter { it.taskType != TaskType.TODO }.map { t ->
+                val since = intervalStartMillis(t.statInterval)
+                val good = events.count { it.taskId == t.id && it.kind == EventKind.HABIT_POS && it.ts >= since }
+                val bad = events.count { it.taskId == t.id && it.kind == EventKind.HABIT_NEG && it.ts >= since }
+                HabitStat(t, good, bad)
+            }
+            val todos = tasks.filter { it.taskType == TaskType.TODO && !it.done }
+            HomeUi(gold, totalGood, totalBad, habits, todos)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
+
+    init {
+        viewModelScope.launch { repo.seedIfEmpty() }
     }
 
-    fun selectRingtone(filename: String) {
-        val uri = fileShare.getUri("ringtones/$filename").toString()
-        viewModelScope.launch {
-            status.value = "Setting ringtone..."
-            val result = callRemoteServiceMethod(
-                LightServiceMethod.SetRingtone,
-                LightServiceMethod.SetRingtone.Request(type = 1, uri = uri)
-            )
-            status.value = result.error?.let {
-                Log.e("HomeScreen", "Unable to set ringtone, error code: ${it.code}")
-                "Unable to set ringtone!"
-            } ?: "Ringtone set: $filename"
-        }
+    fun scoreHabit(task: Task, positive: Boolean) =
+        viewModelScope.launch { repo.scoreHabit(task, positive) }
+
+    fun completeTodo(task: Task) =
+        viewModelScope.launch { repo.completeTodo(task) }
+
+    fun export() = viewModelScope.launch(Dispatchers.IO) {
+        val name = repo.exportCsv(filesDir)
+        _exportMsg.value = "已导出 $name"
     }
 }
 
 @InitialScreen
-class HomeScreen(sealedActivity: SealedLightActivity) : LightScreen<Unit, HomeScreenViewModel>(sealedActivity) {
+class HomeScreen(sealedActivity: SealedLightActivity) :
+    LightScreen<Unit, HomeViewModel>(sealedActivity) {
 
-    override val viewModelClass: Class<HomeScreenViewModel>
-        get() = HomeScreenViewModel::class.java
+    override val viewModelClass: Class<HomeViewModel> get() = HomeViewModel::class.java
 
-    override fun createViewModel(): HomeScreenViewModel {
-        return HomeScreenViewModel(lightContext.fileShare)
-    }
+    override fun createViewModel() = HomeViewModel(Db.repo(lightContext), lightContext.filesDir)
 
     @Composable
     override fun Content() {
-        val ringtones by viewModel.ringtones.collectAsState()
-        val status by viewModel.status.collectAsState()
+        val ui by viewModel.ui.collectAsState()
+        val exportMsg by viewModel.exportMsg.collectAsState()
         val themeColors by LightThemeController.colors.collectAsState()
 
         LightTheme(colors = themeColors) {
@@ -84,56 +104,157 @@ class HomeScreen(sealedActivity: SealedLightActivity) : LightScreen<Unit, HomeSc
                 modifier = Modifier
                     .fillMaxSize()
                     .background(LightThemeTokens.colors.background)
-                    .padding(32.dp)
+                    .padding(horizontal = 20.dp, vertical = 28.dp),
             ) {
+                // 金币
                 LightText(
-                    text = "Ringtones",
+                    text = "◆ ${ui.gold}",
                     variant = LightTextVariant.Heading,
-                    modifier = Modifier.padding(bottom = 16.dp),
+                    modifier = Modifier.padding(bottom = 6.dp),
                 )
 
-                Row(modifier = Modifier.padding(bottom = 24.dp)) {
-                    LightIcon(
-                        icon = LightIcons.SETTINGS,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .lightClickable { LightThemeController.toggle() },
+                // 总次数（累计，不分区间）
+                Row(
+                    modifier = Modifier.padding(bottom = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LightText(
+                        text = "总",
+                        variant = LightTextVariant.Detail,
+                        lighten = true,
+                        modifier = Modifier.padding(end = 16.dp),
                     )
-                    LightIcon(icon = LightIcons.CALL, modifier = Modifier.padding(end = 16.dp))
-                    LightIcon(icon = LightIcons.SEARCH, modifier = Modifier.padding(end = 16.dp))
-                    LightIcon(icon = LightIcons.TOGGLE_ON)
+                    LightText(
+                        text = "[+] ${ui.totalGood}",
+                        variant = LightTextVariant.Copy,
+                        modifier = Modifier.padding(end = 18.dp),
+                    )
+                    LightText(
+                        text = "[-] ${ui.totalBad}",
+                        variant = LightTextVariant.Copy,
+                    )
                 }
 
-                status?.let {
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    item {
+                        LightText(
+                            text = "习惯",
+                            variant = LightTextVariant.Detail,
+                            lighten = true,
+                            modifier = Modifier.padding(bottom = 6.dp),
+                        )
+                    }
+                    items(ui.habits) { stat -> HabitRow(stat) }
+
+                    item {
+                        LightText(
+                            text = "待办",
+                            variant = LightTextVariant.Detail,
+                            lighten = true,
+                            modifier = Modifier.padding(top = 18.dp, bottom = 6.dp),
+                        )
+                    }
+                    items(ui.todos) { todo -> TodoRow(todo) }
+                }
+
+                exportMsg?.let {
                     LightText(
                         text = it,
                         variant = LightTextVariant.Detail,
                         lighten = true,
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(top = 8.dp),
                     )
                 }
 
-                if (ringtones.isEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
                     LightText(
-                        text = "No ringtones found.",
-                        variant = LightTextVariant.Copy,
-                        lighten = true,
+                        text = "[新建]",
+                        variant = LightTextVariant.Fine,
+                        maxLines = 1,
+                        modifier = Modifier.lightClickable { navigateTo({ EditScreen(it, null) }) },
                     )
-                } else {
-                    LazyColumn {
-                        items(ringtones) { filename ->
-                            LightText(
-                                text = filename,
-                                variant = LightTextVariant.Copy,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .lightClickable { viewModel.selectRingtone(filename) }
-                                    .padding(vertical = 12.dp),
-                            )
-                        }
-                    }
+                    LightText(
+                        text = "[商店]",
+                        variant = LightTextVariant.Fine,
+                        maxLines = 1,
+                        modifier = Modifier.lightClickable { navigateTo({ RewardsScreen(it) }) },
+                    )
+                    LightText(
+                        text = "[导出]",
+                        variant = LightTextVariant.Fine,
+                        maxLines = 1,
+                        modifier = Modifier.lightClickable { viewModel.export() },
+                    )
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun HabitRow(stat: HabitStat) {
+        val task = stat.task
+        val t = task.taskType
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            LightText(
+                text = task.title,
+                variant = LightTextVariant.Copy,
+                modifier = Modifier
+                    .weight(1f)
+                    .lightClickable { navigateTo({ EditScreen(it, task.id) }) },
+            )
+            if (t == TaskType.HABIT_POS || t == TaskType.HABIT_BOTH) {
+                LightText(
+                    text = "[+] ${stat.goodCount}",
+                    variant = LightTextVariant.Copy,
+                    modifier = Modifier
+                        .padding(start = 14.dp)
+                        .lightClickable { viewModel.scoreHabit(task, true) },
+                )
+            }
+            if (t == TaskType.HABIT_NEG || t == TaskType.HABIT_BOTH) {
+                LightText(
+                    text = "[-] ${stat.badCount}",
+                    variant = LightTextVariant.Copy,
+                    modifier = Modifier
+                        .padding(start = 14.dp)
+                        .lightClickable { viewModel.scoreHabit(task, false) },
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun TodoRow(todo: Task) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            LightText(
+                text = "□",
+                variant = LightTextVariant.Copy,
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .lightClickable { viewModel.completeTodo(todo) },
+            )
+            LightText(
+                text = todo.title,
+                variant = LightTextVariant.Copy,
+                modifier = Modifier
+                    .weight(1f)
+                    .lightClickable { navigateTo({ EditScreen(it, todo.id) }) },
+            )
         }
     }
 }
