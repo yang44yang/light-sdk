@@ -1,9 +1,8 @@
 [tool]
-id = "com.thelightphone.app"
-label = "Light SDK Tool"
+id = "io.github.yang44yang.habits"
+label = "Habits"
 versionCode = 1
 versionName = "1.0"
-permissions = ["android.permission.INTERNET"]
-# change if you run this on an LP3!
-# serverPackage = "com.lightos"
+permissions = []
+# 真机侧载时改成 "com.lightos";模拟器开发用下面这个
 serverPackage = "com.thelightphone.sdk.emulator"
