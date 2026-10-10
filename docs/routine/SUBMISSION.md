@@ -2,9 +2,9 @@
 
 更新日期：2026-10-10。候选版本：**1.3.1 / versionCode 8**。
 
-**结论：可以进入官方提交流程。当前完成的是本地开发与验收，尚未公开最新源码、运行官方构建或获得审核通过。**
+**结论：可以进入官方提交流程。当前完成的是本地开发与验收，最新版源码已公开；官方构建及审核状态见下方记录。**
 
-本文件是可复制的文案和操作清单，尚未发送给 Light。Dashboard 的具体字段、字符限制和图片裁剪规则尚未逐项核对，按实际表单调整。
+本文件包含可复制的文案、操作清单和实际提交进度。新建表单字段已核对；图片上传及后续构建流程仍在验收。按实际页面的最终状态记录结果。
 
 ## 1. 当前准备程度
 
@@ -15,11 +15,11 @@
 | 本地验证 | 52 项 instrumentation 测试通过；官方 allowlist 提取 24 个文件且内容匹配；干净官方 SDK 的优化 arm64 构建与 lint 通过，仍有两项警告 |
 | 真机验证 | 已安装到 LP3；更新前后可见任务、记录数、分类数量、gold 与累计统计一致；About 和类型提示已检查 |
 | 公开资料 | 本文案、隐私说明、用户指南、中性演示截图已准备 |
-| 最新公开源码 | **待发布**；2026-10-10 核对公开 fork 的 main，仍是 Habits 1.0 / code 1，并指向模拟器 |
+| 最新公开源码 | **已发布**；公开默认分支为 `routine`，基于官方 SDK，排除私人开发历史；旧 `main` 保留 |
 | 官方服务器构建与签名 | **未运行**；当前安装的是开发签名 APK |
 | Tool Library 审核 | **未提交、未获批** |
 
-建议提交前补一次真机奖励兑换与 Undo 的完整流程。该流程已通过模拟器验证，之前真机只检查了列表、历史和返回，没有实际兑换用户的奖励。
+**2026-10-10 真机奖励补测已通过：** 在临时独立测试用户中创建测试习惯和奖励，验证兑换花费 6、撤销准确返还 6、再次兑换计数正确，以及强制停止后历史保持一致。测试用户已删除；原用户可见任务、记录数、分类数量、gold 和累计统计与测试前一致。测试没有兑换原用户的奖励。
 
 **已知兼容性限制：** 测试的 `582-release-lp3` File Manager 不展示第三方工具目录。Routine 可以在手机本地生成 CSV / JSON，但无法通过该版本的 File Manager 下载到电脑或上传备份。真机端到端备份恢复尚未验收，不能宣传为已可用的跨设备备份。模拟器上的文件传输与恢复已经验证。
 
@@ -57,7 +57,7 @@ Feedback: yang.yang.pro@gmail.com
 Source: https://github.com/yang44yang/light-sdk
 ```
 
-作者信息已获作者授权。如果 Dashboard 有公开作者 / 联系方式字段，可分别填写；若没有，保留在介绍末尾。字段是否公开、是否存在尚未核对。手机内也可从 **Help → About** 查看这些静态文字。
+作者信息已获作者授权。2026-10-10 检查新建表单，没有独立作者 / 联系方式字段；已将公开 X 和邮箱放入 Description。表单包含 Title、GitHub Repo、Description 和 Tags，分类选择 Productivity。Description 是单行输入框，实际提交时以空格分隔段落。手机内也可从 **Help → About** 查看这些静态文字。
 
 ### 中文说明（供你审阅）
 
@@ -67,7 +67,7 @@ Source: https://github.com/yang44yang/light-sdk
 
 | 参数 | 填写内容 |
 | --- | --- |
-| Public GitHub repository | `https://github.com/yang44yang/light-sdk`，先发布本次源码到默认分支 |
+| Public GitHub repository | `https://github.com/yang44yang/light-sdk`，默认分支为 `routine`，包含本次生产源码 |
 | Package ID | `io.github.yang44yang.habits`，保持现有 ID；应用显示名是 Routine |
 | Version name / code | `1.3.1` / `8`；若 Dashboard 已有 code ≥ 8，先递增并重新构建验收 |
 | SDK | `0.2.0`；2026-10-10 核对官方 main，与本地一致 |
@@ -89,11 +89,11 @@ Source: https://github.com/yang44yang/light-sdk
 若表单要求隐私说明或指南的公开 URL，在源码发布后使用：
 
 ```text
-https://github.com/yang44yang/light-sdk/blob/main/docs/routine/PRIVACY.md
-https://github.com/yang44yang/light-sdk/blob/main/docs/routine/USER_GUIDE.md
+https://github.com/yang44yang/light-sdk/blob/routine/docs/routine/PRIVACY.md
+https://github.com/yang44yang/light-sdk/blob/routine/docs/routine/USER_GUIDE.md
 ```
 
-这些是待发布页面的目标地址，当前尚不能视为已经公开的最新资料。
+公开分支已包含这些资料；后续以提交构建对应的 commit 为准。
 
 ### 推荐提交截图
 
@@ -124,7 +124,7 @@ Routine 1.3.1 provides local habit and to-do tracking for Light Phone III, separ
 ```text
 Tested candidate: Routine 1.3.1, versionCode 8, on Light Phone III running 582-release-lp3. The optimized arm64 release builds from sources extracted through the official builder allowlist. 52 instrumentation tests pass. A same-development-certificate phone update preserved the collected visible task names, record counts, category sizes, gold, and lifetime totals.
 
-Known limitation: this firmware's File Manager does not expose third-party tool directories. CSV and JSON creation works locally, but off-device transfer and real-phone restore remain unverified. These operations were verified on the SDK emulator. Reward redemption and undo were also verified on the emulator; the physical-phone check opened Rewards and History without redeeming a real reward.
+Known limitation: this firmware's File Manager does not expose third-party tool directories. CSV and JSON creation works locally, but off-device transfer and real-phone restore remain unverified. These operations were verified on the SDK emulator. Reward redemption, exact undo refund, repeat counts, and history persistence after a cold start also passed on the physical phone in a separate temporary test user. That test user was removed afterward, and the original user's collected visible records and gold were unchanged.
 
 An earlier user-reported not-responding incident could not be diagnosed from an actual ANR trace. Subsequent short phone checks recorded no additional ANR exit entry; this is not a claim of long-term stability.
 
@@ -145,10 +145,10 @@ Suggested review flow: read or skip the introduction; create a Strength training
 
 ## 6. 提交前的最后清单
 
-- [ ] 真机补测奖励兑换 → receipt → Undo → History，并确认 gold 正确恢复。
+- [x] 真机独立测试用户：兑换 → receipt → Undo → History、再次兑换计数及冷启动历史通过；测试用户已删除，原用户可见数据保留。
 - [ ] 审阅本文案、隐私说明及截图；如实保留 v582 文件传输限制。
-- [ ] 将最新源码与公开资料发布到默认分支，确认没有私人文件。
-- [ ] 核对 Dashboard 现有工具、上次 versionCode 和实际表单字段。
+- [x] 将最新源码与公开资料发布到默认分支 `routine`，确认没有私人文件及私人开发提交历史。
+- [x] 开发者模式经邮件验证开启；新建表单字段已核对，工具列表初次检查为空。
 - [ ] 记录最终公开 commit SHA，提交官方构建。
 - [ ] 官方构建成功后验收其签名 APK，跟进 pending approval 与邮件反馈。
 

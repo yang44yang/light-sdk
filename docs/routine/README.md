@@ -608,3 +608,23 @@ Final local APK SHA-256:
 `45a82e6746dcef88e2851c91a336b194538d01abf4b75cd12c560acbd521be1e`.
 APKs and private receipts stay under ignored `local/`. Public guide and About
 screenshots contain only neutral examples and author-approved contact details.
+
+## Physical-phone reward acceptance and public source — 2026-10-10
+
+Routine 1.3.1 / code 8 was checked on the physical LP3 in a temporary isolated
+Android test user. A test habit supplied 10 gold; a test reward cost 6.
+Redemption showed Spent 6 / Left 4; Undo restored exactly 10. A repeated
+redemption correctly restarted the non-undone count at 1, and reward history
+retained both the undone and completed entries after force-stop / cold start.
+
+The temporary test user was removed. The original user's collected visible task
+names, per-item counts, category sizes, gold and lifetime totals matched the
+pre-test baseline, and no new ANR exit-history entry was observed during this
+short check. The phone was returned to its original user and normal home.
+No original-user reward was redeemed. Private receipts remain in ignored local/.
+
+The public GitHub fork now uses routine as its default branch. Its source starts
+from official SDK commit 311aa2d and includes the reviewed Routine files rather
+than the private development history. All 24 production files match the
+previously verified clean-SDK build. The upstream AGP toolchain is preserved in
+that public branch; local development overrides remain in the working checkout.
