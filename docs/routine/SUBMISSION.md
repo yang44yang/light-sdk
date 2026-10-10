@@ -2,9 +2,9 @@
 
 更新日期：2026-10-10。候选版本：**1.3.1 / versionCode 8**。
 
-**结论：可以进入官方提交流程。当前完成的是本地开发与验收，最新版源码已公开；官方构建及审核状态见下方记录。**
+**结论：Routine 已注册，三张截图已保存，1.3.1 的官方构建已受理。构建及审核结果见下方记录。**
 
-本文件包含可复制的文案、操作清单和实际提交进度。新建表单字段已核对；图片上传及后续构建流程仍在验收。按实际页面的最终状态记录结果。
+本文件包含可复制的文案、操作清单和实际提交进度。已完成新建工具与图片上传；按 Dashboard 的实际最终状态记录构建和审批结果。
 
 ## 1. 当前准备程度
 
@@ -16,8 +16,9 @@
 | 真机验证 | 已安装到 LP3；更新前后可见任务、记录数、分类数量、gold 与累计统计一致；About 和类型提示已检查 |
 | 公开资料 | 本文案、隐私说明、用户指南、中性演示截图已准备 |
 | 最新公开源码 | **已发布**；公开默认分支为 `routine`，基于官方 SDK，排除私人开发历史；旧 `main` 保留 |
-| 官方服务器构建与签名 | **未运行**；当前安装的是开发签名 APK |
-| Tool Library 审核 | **未提交、未获批** |
+| Dashboard 工具注册 | **已成功**；名称 Routine，分类 Productivity，包名识别正确；三张截图已上传并保存 |
+| 官方服务器构建与签名 | **已提交，processing**；构建代码为下方完整 SHA；当前手机安装的是开发签名 APK |
+| Tool Library 状态 | **unpublished / Not approved**；尚未获批 |
 
 **2026-10-10 真机奖励补测已通过：** 在临时独立测试用户中创建测试习惯和奖励，验证兑换花费 6、撤销准确返还 6、再次兑换计数正确，以及强制停止后历史保持一致。测试用户已删除；原用户可见任务、记录数、分类数量、gold 和累计统计与测试前一致。测试没有兑换原用户的奖励。
 
@@ -39,7 +40,15 @@ Routine
 Build small habits and record everyday progress.
 ```
 
-### Description
+### Dashboard 实际使用的 Description
+
+```text
+Track habits and to-dos, earn local gold and redeem personal rewards. English/Chinese. Records stay on your phone. File transfer unavailable on tested LightOS v582. By @BitVendetta (x.com/BitVendetta); feedback: yang.yang.pro@gmail.com.
+```
+
+2026-10-10，长介绍提交后没有成功提示，工具列表仍为空；精简为以上 236 个字符后，页面显示 **Tool was created** 并进入图片上传。页面未公布最大长度，不能据此断言具体字数限制。GitHub Repo 使用完整 URL。以下完整介绍保留在公开文档供审核阅读。
+
+### 完整 Description
 
 ```text
 Routine helps you turn a goal into small actions you can record on your Light Phone. Track habits you want to build or reduce, keep a short list of one-time tasks, and view your counts for the week, month, or year.
@@ -57,7 +66,7 @@ Feedback: yang.yang.pro@gmail.com
 Source: https://github.com/yang44yang/light-sdk
 ```
 
-作者信息已获作者授权。2026-10-10 检查新建表单，没有独立作者 / 联系方式字段；已将公开 X 和邮箱放入 Description。表单包含 Title、GitHub Repo、Description 和 Tags，分类选择 Productivity。Description 是单行输入框，实际提交时以空格分隔段落。手机内也可从 **Help → About** 查看这些静态文字。
+作者信息已获作者授权。2026-10-10 检查新建表单，没有独立作者 / 联系方式字段；已将公开 X 和邮箱放入 Description。表单包含 Title、GitHub Repo、Description 和 Tags，分类选择 Productivity。Description 是单行输入框。手机内也可从 **Help → About** 查看这些静态文字。
 
 ### 中文说明（供你审阅）
 
@@ -73,7 +82,7 @@ Source: https://github.com/yang44yang/light-sdk
 | SDK | `0.2.0`；2026-10-10 核对官方 main，与本地一致 |
 | Server package | `com.lightos` |
 | Tool permissions / capability | `[]` / `["tool-manager-provider"]`；SDK 继承权限见隐私说明 |
-| Build git ref | **待填写：发布后的完整 commit SHA**，不要填未发布的本地分支状态 |
+| Build git ref | `5cbfb453900fc98fb70edb82ca87111bde7a7530`，已公开且已提交官方构建 |
 | License | MIT，保留原 SDK 的许可证 |
 | Feedback email | `yang.yang.pro@gmail.com` |
 | Author / X | `@BitVendetta` / `https://x.com/BitVendetta` |
@@ -100,12 +109,10 @@ https://github.com/yang44yang/light-sdk/blob/routine/docs/routine/USER_GUIDE.md
 | 顺序 | 文件 | 展示内容 |
 | --- | --- | --- |
 | 1 | [home-en.png](screenshots/home-en.png) | 首页习惯、方括号数量和分类切换 |
-| 2 | [home-todos-en.png](screenshots/home-todos-en.png) | 独立待办列表 |
-| 3 | [welcome-en.png](screenshots/welcome-en.png) | 正向 / 负向习惯的首次使用介绍 |
-| 4 | [rewards-en.png](screenshots/rewards-en.png) | 自定义奖励与直达兑换 |
-| 5 | [reward-receipt-en.png](screenshots/reward-receipt-en.png) | 兑换结果与 Undo |
+| 2 | [welcome-en.png](screenshots/welcome-en.png) | 正向 / 负向习惯的首次使用介绍 |
+| 3 | [reward-receipt-en.png](screenshots/reward-receipt-en.png) | 兑换结果与 Undo |
 
-官方要求至少一张图；以上五张是建议组合。均为官方 SDK 模拟器中独立测试用户的中性演示数据，1080 × 1240，未经修饰。引导图来自 1.3.1；首页图来自 1.3.0，奖励图来自 1.1.0，对应界面在当前版本保持一致。其他语言、About 和难度截图可作补充。上传后检查 Dashboard 预览及裁剪。
+官方要求至少一张图；Dashboard 实际最多接受三张，每张 JPEG / PNG / WebP 不超过 5 MB。以上三张已上传并保存。均为官方 SDK 模拟器中独立测试用户的中性演示数据，1080 × 1240，未经修饰。引导图来自 1.3.1；首页图来自 1.3.0，奖励图来自 1.1.0，对应界面在当前版本保持一致。待办、奖励列表、其他语言、About 和难度图保留在公开截图目录。
 
 不要提交私人手机照片、真实记录、备份、配对令牌、开发密钥或 `local/` 下的验收文件。
 
@@ -115,6 +122,12 @@ https://github.com/yang44yang/light-sdk/blob/routine/docs/routine/USER_GUIDE.md
 
 ```text
 Routine 1.3.1 provides local habit and to-do tracking for Light Phone III, separate category tabs, three difficulty levels for positive records, personal reward redemption with receipts and undo, and reward history. English and Chinese follow the system language. This release adds concrete positive and negative habit examples, editor type explanations, and Help → About with author and feedback details. CSV and JSON files can be generated locally; file transfer depends on LightOS support for third-party tool directories.
+```
+
+Dashboard 实际提交的精简构建说明：
+
+```text
+Routine 1.3.1: local habits and to-dos, difficulty levels, rewards with receipts, undo and history. English/Chinese system languages; clearer habit examples and Help/About. CSV/JSON creation is local; transfer is unavailable on tested LightOS v582.
 ```
 
 ### Reviewer notes
@@ -146,10 +159,11 @@ Suggested review flow: read or skip the introduction; create a Strength training
 ## 6. 提交前的最后清单
 
 - [x] 真机独立测试用户：兑换 → receipt → Undo → History、再次兑换计数及冷启动历史通过；测试用户已删除，原用户可见数据保留。
-- [ ] 审阅本文案、隐私说明及截图；如实保留 v582 文件传输限制。
+- [x] 审阅本文案、隐私说明及截图；如实保留 v582 文件传输限制。
 - [x] 将最新源码与公开资料发布到默认分支 `routine`，确认没有私人文件及私人开发提交历史。
 - [x] 开发者模式经邮件验证开启；新建表单字段已核对，工具列表初次检查为空。
-- [ ] 记录最终公开 commit SHA，提交官方构建。
+- [x] 注册 Routine，确认包名和公开资料；三张截图上传并保存。
+- [x] 记录最终公开 commit SHA，提交官方构建；Dashboard 显示 Build submitted 与 processing。
 - [ ] 官方构建成功后验收其签名 APK，跟进 pending approval 与邮件反馈。
 
 提高通过机会的重点：清楚说明工具帮助用户完成什么、沿用 Light 的简洁界面、披露数据存储和兼容性限制，并提供可复现的审核流程。不存在可保证通过的文案或测试数量。
