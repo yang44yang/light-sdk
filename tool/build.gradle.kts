@@ -79,6 +79,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 }
 
+ksp {
+    // Keep Room's migration history inside the official builder's source allowlist.
+    arg("room.schemaLocation", "$projectDir/src/main/assets/room-schemas")
+}
+
 /**
  * Uploads the debug APK to a device/emulator running the Light SDK server, via the
  * "developer" tool manager branch (see DeveloperModeDataTree.kt in sdk/server), and waits for

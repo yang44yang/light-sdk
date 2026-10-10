@@ -1,3 +1,17 @@
+# Routine for Light Phone III
+
+Routine helps you build small habits, record progress, and choose personal
+rewards. English and Chinese follow your system language.
+
+Created by **[@BitVendetta](https://x.com/BitVendetta)**.
+Feedback: **[yang.yang.pro@gmail.com](mailto:yang.yang.pro@gmail.com)**.
+
+See the [Routine user guide](docs/routine/USER_GUIDE.md),
+[privacy information](docs/routine/PRIVACY.md), and
+[development notes](docs/routine/README.md).
+
+The original Light SDK documentation is preserved below.
+
 # light-sdk
 or: a tool for building Tools
 

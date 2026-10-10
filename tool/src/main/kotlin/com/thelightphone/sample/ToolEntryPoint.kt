@@ -1,26 +1,20 @@
 package com.thelightphone.sample
 
-import android.util.Log
 import com.thelightphone.sdk.EntryPoint
 import com.thelightphone.sdk.LightEntryPoint
-import com.thelightphone.sdk.shared.LightServerData
-import kotlinx.coroutines.flow.StateFlow
+import com.thelightphone.toolmanager.ClientLeafNode
+import com.thelightphone.toolmanager.ClientToolManifest
+import com.thelightphone.toolmanager.FileBrowserSpec
 
 @EntryPoint
 object ToolEntryPoint : LightEntryPoint {
-    // called when Tool first launches, use to initialize dependencies etc
-    override suspend fun onToolCreate(
-        serverData: StateFlow<LightServerData?>,
-    ) {
-        serverData.collect {
-            // this is where you'd send push credentials up to your app server
-            Log.d("ToolEntryPoint", "Current LightOS registration data: $it")
-        }
-    }
-
-    override suspend fun onPushNotification(
-        data: ByteArray,
-    ) {
-        Log.d("ToolEntryPoint", "received push notification: $data")
-    }
+    override fun getToolManagerManifest() = ClientToolManifest(
+        title = "Routine",
+        roots = listOf(
+            ClientLeafNode(FileBrowserSpec("Downloads", "exports",
+                "Create a CSV or full backup in Routine → Data, then download it here. Backups contain your private records.")),
+            ClientLeafNode(FileBrowserSpec("Restore Inbox", "imports",
+                "Upload a Routine JSON backup here. Nothing is restored automatically. Open Routine → Data to review and confirm.")),
+        ),
+    )
 }

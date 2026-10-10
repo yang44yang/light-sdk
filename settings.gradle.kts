@@ -26,6 +26,12 @@ include(":sdk:ui")
 include(":sdk:client")
 include(":tool")
 
+// Optional, test-only harness: compiles the real tool sources against Android Room.
+// It is not a dependency of :tool and is not needed by Light's submission builder.
+if (providers.gradleProperty("routineVerification").orNull == "true") {
+    include(":verification")
+}
+
 // The tool builder passes -DlightSdk.toolOnly=true to configure only what
 // :tool needs.
 if (providers.systemProperty("lightSdk.toolOnly").orNull != "true") {
